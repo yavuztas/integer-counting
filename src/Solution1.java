@@ -5,8 +5,8 @@ import java.nio.channels.FileChannel;
 /**
  * Solution 1: Single-thread with micro-optimizations
  * <p>
- * 0. First try, single thread approach using HashMap =~ 90ms
- * 1. Change HashMap by a custom integer array        =~ 36ms
+ * 0. First try, single thread approach using HashMap =~ 125ms
+ * 1. Change HashMap by a custom integer array        =~ 85ms
  */
 public class Solution1 {
 
@@ -15,8 +15,6 @@ public class Solution1 {
   private static final int[] NUMBER_MAP = new int[1000];
 
   public static void main(String[] args) throws Exception {
-
-    final long time = System.currentTimeMillis();
 
     final String inputFile = args[0];
 
@@ -42,7 +40,6 @@ public class Solution1 {
         current = 10 * current + (b-'0');
       }
       // print result
-      System.out.println("Took: " + (System.currentTimeMillis() - time) + "ms");
       System.out.println("Found " + found + ", max: " + maxOccurance);
     }
   }

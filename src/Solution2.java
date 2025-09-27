@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * Solution 2: Concurrent processing with syncronization (lockless using CAS)
  * <p>
- * 1. Split the buffer and parse concurrently, synchronized by AtomicInteger =~ ?
+ * 1. Split the buffer and parse concurrently, synchronized by AtomicInteger =~ 120ms
  */
 public class Solution2 {
 
@@ -76,7 +76,6 @@ public class Solution2 {
 
     System.out.println("Threads: " + THREAD_COUNT);
 
-    final long time = System.currentTimeMillis();
     // populate number map
     for (int i = 0; i < NUMBER_MAP.length; i++) {
       NUMBER_MAP[i] = new AtomicInteger(0);
@@ -121,16 +120,16 @@ public class Solution2 {
           current = 10 * current + (b-'0');
         }
       }));
-      // t.start();
+      t.start();
     }
 
     for (Thread thread : threads) {
-      // thread.join(); // wait all threads to complete
+       thread.join(); // wait all threads to complete
     }
 
     // print result
     final long foundTuple = maxOccuranceTuple.get();
-    System.out.println("Found " + getLowerBits(foundTuple) + ", max: " + getHigherBits(foundTuple) + ", took: " + (System.currentTimeMillis() - time) + "ms");
+    System.out.println("Found " + getLowerBits(foundTuple) + ", max: " + getHigherBits(foundTuple));
   }
 
 }
