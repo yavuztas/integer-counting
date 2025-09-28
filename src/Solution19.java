@@ -1,4 +1,5 @@
 import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 
@@ -9,11 +10,30 @@ import java.nio.channels.FileChannel;
  * 1. Change HashMap by a custom integer array        =~ 85ms
  * 2. Compile into native (25-graal)                  =~ 15ms
  */
-public class Solution1 {
+public class Solution19 {
 
   // collecting numbers into an array eleminates a lot of operations like auto-boxing, hash calculation, boundary checks, etc.
   // mapped one-to-one with indices is possible since our data set is limited [0 - 999] Therefore, this eleminates hash calculation because no clashes possible
   private static final int[] NUMBER_MAP = new int[1000];
+
+  /**
+   * Finds the linebreak pos in an integer
+   * @param word 4 bytes of chunk in integer
+   * @return 0 to 3. If non found returns 4
+   */
+  private static int linebreakPos(int word) {
+    // hasvalue & haszero
+    // adapted from https://graphics.stanford.edu/~seander/bithacks.html#ZeroInWord
+    final int hasVal = word ^ 0xA0A0A0A; // hasvalue, 0xA0A0A0A is "\n\n\n\n" in text
+    final int hasZero = ((hasVal - 0x01010101) & ~hasVal & 0x80808080); // haszero
+    return Integer.numberOfLeadingZeros(hasZero) >>> 3;
+  }
+
+  private static int linebreakPosShort(short word) {
+    final int hasVal = word ^ 0xA0A; // hasvalue, 0xA0A0A0A is "\n\n\n\n" in text
+    final int hasZero = ((hasVal - 0x0101) & ~hasVal & 0x8080); // haszero
+    return Integer.numberOfTrailingZeros(hasZero) >>> 3;
+  }
 
   public static void main(String[] args) throws Exception {
 
@@ -27,9 +47,29 @@ public class Solution1 {
       final long time = System.currentTimeMillis();
 
       int current = 0; // current number
-      byte b;
       int pos = 0;
-      while (pos < fileSize) {
+      final long limit = fileSize - 4; // safe ending for 4 byte chunks
+      while (pos < limit) {
+        final short chunk1 = buffer.getShort(pos);
+        final short chunk2 = buffer.getShort(pos+2);
+        final int linebreakPos1 = linebreakPosShort(chunk1) + pos;
+        final int linebreakPos2 = linebreakPosShort(chunk2) + pos + 2;
+
+        System.out.println(linebreakPos1 + " " + linebreakPos2);
+
+        /*
+        for (int i = linebreakPos; i > 0; i--) {
+          current = 10 * current + ((byte) (chunk >> (3-linebreakPos+i)*8))-'0';
+        }*/
+        // int n = 100 * (b3-'0') + 10 * (b2-'0') + b1-'0';
+
+        // NUMBER_MAP[current]++; // increment
+        current = 0;
+        pos += 4;
+      }
+
+      byte b;
+      while (pos < fileSize) { // read the leftovers, byte by byte
         if ((b = buffer.get(pos++)) == '\n') { // read & check each byte
           NUMBER_MAP[current]++; // increment
           current = 0;

@@ -9,7 +9,8 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * Solution 2: Concurrent processing with syncronization (lockless using CAS)
  * <p>
- * 1. Split the buffer and parse concurrently, synchronized by AtomicInteger =~ 120ms
+ * 1. Parse concurrently, synchronized by AtomicInteger =~ 120ms
+ * 2. Compile into native (25-graal)                    =~ 19ms (still not better than single thread version)
  */
 public class Solution2 {
 
@@ -74,8 +75,6 @@ public class Solution2 {
 
   public static void main(String[] args) throws Exception {
 
-    System.out.println("Threads: " + THREAD_COUNT);
-
     // populate number map
     for (int i = 0; i < NUMBER_MAP.length; i++) {
       NUMBER_MAP[i] = new AtomicInteger(0);
@@ -91,19 +90,11 @@ public class Solution2 {
     final Thread[] threads = new Thread[THREAD_COUNT];
     final int segmentSize = buffer.capacity() / THREAD_COUNT;
 
-//    System.out.println("capacity: " +  buffer.capacity());
-//    System.out.println("segmentSize: " + segmentSize);
-
     int start = 0;
     for (int i = 0; i < THREAD_COUNT; i++) {
       start = findSegmentStart(buffer, start);
       final int size = findSegmentSize(buffer, start, segmentSize);
       final MappedByteBuffer segment = buffer.slice(start, size);
-
-//      byte[] out = new byte[segment.capacity()];
-//      buffer.get(start, out);
-//      System.out.println("Thread["+i+"] start: " + start + ", end: " + (start + size) + ", content: " + new String(out).replaceAll("\n", "-"));
-
       start += size; // update the next start pos
 
       final var t = (threads[i] = new Thread(() -> {
