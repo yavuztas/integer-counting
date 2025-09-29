@@ -2,6 +2,7 @@ import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.channels.FileChannel.MapMode;
 
 /**
  * Concurrent Processing, Lock-free via actor-model approach
@@ -15,7 +16,7 @@ import java.nio.channels.FileChannel;
  */
 public class Solution3 {
 
-  static final int THREAD_COUNT = Integer.getInteger("threads", Runtime.getRuntime().availableProcessors());
+  static final int THREAD_COUNT = Integer.getInteger("threads",2 * Runtime.getRuntime().availableProcessors());
   static final int[] NUMBER_MAP = new int[1000];
 
   static class Actor extends Thread {
@@ -35,7 +36,8 @@ public class Solution3 {
       byte b;
       int pos = 0; // relative to segment
       int current = 0; // current number
-      while (pos++ < this.segment.limit()) {
+      final int limit = this.segment.limit();
+      while (pos++ < limit) {
         if ((b = this.segment.get()) == '\n') { // read & check each byte
           this.segmentMap[current]++; // increment
           current = 0; // reset current
@@ -47,45 +49,46 @@ public class Solution3 {
 
   }
 
-  static int findSegmentStart(ByteBuffer segment, int pos) {
-    if (pos == 0)
+  static int findSegmentStart(ByteBuffer segment) {
+    if (segment == null)
       return 0;
     // read the segment to backwards until find the first '\n'
+    int pos = segment.limit() - 1;
     while (segment.get(pos) != '\n') {
       pos--;
     }
     return pos + 1;
   }
 
-  static int findSegmentSize(ByteBuffer buffer, int start, int segmentSize) {
+  static long findSegmentSize(long fileSize, long start, int segmentSize) {
     // find a safe ending when segments aren't evenly distributed
-    if ((start + segmentSize) > buffer.capacity())
-      return segmentSize - (start + segmentSize - buffer.capacity());
-    if ((start + segmentSize) > (buffer.capacity() - segmentSize))
-      return buffer.capacity() - start;
+    if ((start + segmentSize) > fileSize)
+      return segmentSize - (start + segmentSize - fileSize);
+    if ((start + segmentSize) > (fileSize - segmentSize))
+      return fileSize - start;
     return segmentSize;
   }
 
   public static void main(String[] args) throws Exception {
 
     final String inputFile = args[0];
-    final MappedByteBuffer buffer;
-    try (final var file = new RandomAccessFile(inputFile, "r")) {
-      final FileChannel channel = file.getChannel();
-      buffer = channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size()); // we don't care about channel size here since can be max ~= 4M < Integer.MAX_VALUE
-    }
-
+    final FileChannel channel;
+    final long fileSize;
     final Actor[] actors = new Actor[THREAD_COUNT];
-    final int segmentSize = buffer.capacity() / THREAD_COUNT;
-
-    int start = 0;
-    for (int i = 0; i < THREAD_COUNT; i++) {
-      start = findSegmentStart(buffer, start);
-      final int size = findSegmentSize(buffer, start, segmentSize);
-      final MappedByteBuffer segment = buffer.slice(start, size);
-      final var actor = (actors[i] = new Actor(segment));
-      start += size; // update the next start pos
-      actor.start(); // run the actor
+    try (final var file = new RandomAccessFile(inputFile, "r")) {
+      channel = file.getChannel();
+      fileSize = channel.size();
+      final int segmentSize = Math.toIntExact(fileSize / THREAD_COUNT); // each segment must be lower than Integer.MAX_VALUE
+      long start = 0;
+      MappedByteBuffer prev = null;
+      for (int i = 0; i < THREAD_COUNT; i++) {
+        start += findSegmentStart(prev); // update the next start pos
+        final long size = findSegmentSize(fileSize, start, segmentSize);
+        final MappedByteBuffer segment = channel.map(MapMode.READ_ONLY, start, size);
+        final var actor = (actors[i] = new Actor(segment));
+        actor.start(); // run the actor
+        prev = segment; // keep the segment to calculate other's start index
+      }
     }
 
     for (Actor actor : actors) {

@@ -17,7 +17,7 @@ public class Solution2 {
   static final int THREAD_COUNT = Integer.getInteger("threads", Runtime.getRuntime().availableProcessors());
 
   // collecting numbers into an array eleminates a lot of operations like auto-boxing, hash calculation, boundary checks, etc.
-  // mapped one-to-one with indices is possible since our data set is limited [0 - 999] Therefore, this eleminates hash calculation because no clashes possible
+  // mapped one-to-one with indices is possible since our data set is limited [0-999] Therefore, this eleminates hash calculation because no clashes possible
   static final AtomicInteger[] NUMBER_MAP = new AtomicInteger[1000];
 
   // Stores 2 integers in a long (occurance + number) to set 2 values atomically at the same time

@@ -2,7 +2,7 @@
 
 JAVA_VERSION=25
 JAVA_VERSION_ID="25-graal"
-INPUT_ARGS="./data/1M_random_numbers.txt"
+INPUT_ARGS="./data/1B_random_numbers.txt"
 
 # Handle positional arguments
 shift $((OPTIND - 1))
@@ -37,7 +37,7 @@ if [ "$param2" == "--native" ]; then
     echo "Picking up native image './$imageName'" 1>&2
     hyperfine $HYPERFINE_OPTS "$TIMEOUT ./$imageName $INPUT_ARGS"
 else
-    JAVA_OPTS="-Dthreads=8" # -Xmx192m -XX:MaxGCPauseMillis=1 -XX:-AlwaysPreTouch -XX:+UseSerialGC -XX:+TieredCompilation --enable-preview
+    JAVA_OPTS="" # -Xmx192m -XX:MaxGCPauseMillis=1 -XX:-AlwaysPreTouch -XX:+UseSerialGC -XX:+TieredCompilation --enable-preview
     echo "Choosing to run the app in JVM mode" 1>&2
     hyperfine $HYPERFINE_OPTS "$TIMEOUT sh -c '$HOME/.sdkman/candidates/java/$JAVA_VERSION_ID/bin/java $JAVA_OPTS -classpath ./bin $param1 $INPUT_ARGS'"
 fi
