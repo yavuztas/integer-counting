@@ -59,13 +59,13 @@ Run `evaluate.sh Solution5`.
 * (x) terminated with error, possibly needs refactoring (against integer overflow, etc.)
 
 ### Comparison (Java 25 GraalVM — Native)
-| SOLUTION                                                        | 1M    | 10M   | 100M  | 1B   |
-|-----------------------------------------------------------------|-------|-------|-------|------|
-| Single-Threaded - using MappedByteArray                         | 7.1   | 33.5  | 313.8 | x    |
-| Multi-Threaded - lockless synchronization (CAS)                 | 9.9   | 56.7  | 517.1 | 5115 |
-| Multi-Threaded - lock-free via actor-model approach             | 5.0   | 10.5  | 59.4  | 529  |
-| Single-Threaded - using Java Memory Api                         | 107.1 | 917.7 | oom   | oom  |
-| Single-Threaded - branchless version, scan four bytes at a time | 8.1   | 43.0  | 386.3 | x    |
+| SOLUTION                                                        | 1M    | 10M   | 100M  | 1B    |
+|-----------------------------------------------------------------|-------|-------|-------|-------|
+| Single-Threaded - using MappedByteArray                         | 7.1   | 33.5  | 313.8 | x     |
+| Multi-Threaded - lockless synchronization (CAS)                 | 9.9   | 56.7  | 517.1 | 5115  |
+| Multi-Threaded - lock-free via actor-model approach             | 5.0   | 10.5  | 59.4  | 494.2 |
+| Single-Threaded - using Java Memory Api                         | 107.1 | 917.7 | oom   | oom   |
+| Single-Threaded - branchless version, scan four bytes at a time | 8.1   | 43.0  | 386.3 | x     |
 
 * Showing elapsed time in ms.
 * (x) terminated with an error, possibly needs refactoring (against integer overflow, etc.).

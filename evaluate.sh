@@ -25,7 +25,7 @@ sdk use java $JAVA_VERSION_ID
 "$HOME"/.sdkman/candidates/java/$JAVA_VERSION_ID/bin/javac --release "$JAVA_VERSION" --enable-preview -d ./bin ./src/"$param1".java
 
 if [ "$param2" == "--native" ] && [ "$param3" != "skip" ]; then
-    NATIVE_IMAGE_OPTS="--initialize-at-build-time=$param1 -O3 -march=native --gc=epsilon -R:MaxHeapSize=192m --enable-preview" # --gc=epsilon -R:MaxHeapSize=64m -H:-GenLoopSafepoints
+    NATIVE_IMAGE_OPTS="--initialize-at-build-time=$param1 -O3 -march=native --gc=epsilon -R:MaxHeapSize=192m -H:-GenLoopSafepoints" # --gc=epsilon -R:MaxHeapSize=64m -H:-GenLoopSafepoints --enable-preview
     native-image $NATIVE_IMAGE_OPTS -cp ./bin "$param1"
 fi
 
