@@ -12,7 +12,7 @@ import java.nio.channels.FileChannel.MapMode;
  *    - Spawning platform threads costs a lot (~20ms) and our dataset (1M) is still relatively small.
  *      However, if we assume the dataset is arbitrarily large (like 1 billion) then multi-thread processing should outperform.
  *    - Using virtual threads didn't help, worse in performance ~88ms
- * 2. Compile into native (25-graal)  =~ 5.8ms (same performance with the single thread version)
+ * 2. Compile into native (25-graal)  =~ 5.8ms (slightly better than the single thread version)
  */
 public class Solution3 {
 
