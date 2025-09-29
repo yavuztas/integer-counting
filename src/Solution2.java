@@ -9,8 +9,8 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * Solution 2: Concurrent processing with syncronization (lockless using CAS)
  * <p>
- * 1. Parse concurrently, synchronized by AtomicInteger =~ 120ms
- * 2. Compile into native (25-graal)                    =~ 19ms (still not better than single thread version)
+ * 1. Parse concurrently, synchronized by AtomicInteger =~ 70ms
+ * 2. Compile into native (25-graal)                    =~ 9.8ms (still not better than the single thread version)
  */
 public class Solution2 {
 
@@ -45,11 +45,11 @@ public class Solution2 {
     return (int) (compact & VALUE_MASK);
   }
 
-  static int findSegmentStart(ByteBuffer buffer, int pos) {
+  static int findSegmentStart(ByteBuffer segment, int pos) {
     if (pos == 0)
       return 0;
-    // read segment to backwards until find the first '\n'
-    while (buffer.get(pos) != '\n') {
+    // read the segment to backwards until find the first '\n'
+    while (segment.get(pos) != '\n') {
       pos--;
     }
     return pos + 1;
@@ -102,7 +102,7 @@ public class Solution2 {
         int pos = 0; // relative to segment
         int current = 0; // current number
         while (pos++ < segment.limit()) {
-          if ((b = segment.get()) == '\n') { // read & check each byte
+          if ((b = segment.get()) == '\n') { // read and check each byte
             final int occurance = NUMBER_MAP[current].incrementAndGet(); // atomic increment
             trySetMaxOccuranceTuple(occurance, current);
             current = 0; // reset number

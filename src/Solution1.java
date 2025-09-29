@@ -3,11 +3,11 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 
 /**
- * Solution 1: Single-thread with micro-optimizations
+ * Solution 1: Single-thread, MappedByteBuffer, byte-by-byte process
  * <p>
- * 0. First try, single thread approach using HashMap =~ 125ms
- * 1. Change HashMap by a custom integer array        =~ 85ms
- * 2. Compile into native (25-graal)                  =~ 15ms
+ * 0. First try, single thread approach using HashMap =~ 81ms
+ * 1. Change HashMap by a custom integer array        =~ 52ms
+ * 2. Compile into native (25-graal)                  =~ 6.9ms
  */
 public class Solution1 {
 
@@ -24,13 +24,11 @@ public class Solution1 {
       final long fileSize = channel.size();
       final MappedByteBuffer buffer = channel.map(FileChannel.MapMode.READ_ONLY, 0, fileSize); // we don't care channel size here since can be max ~= 4M < Integer.MAX_VALUE
 
-      final long time = System.currentTimeMillis();
-
       int current = 0; // current number
       byte b;
       int pos = 0;
       while (pos < fileSize) {
-        if ((b = buffer.get(pos++)) == '\n') { // read & check each byte
+        if ((b = buffer.get(pos++)) == '\n') { // read and check each byte
           NUMBER_MAP[current]++; // increment
           current = 0;
           continue;
@@ -49,11 +47,8 @@ public class Solution1 {
         }
       }
 
-      System.out.println("took " + (System.currentTimeMillis() - time) + "ms");
-
       // print result
       System.out.println("Found " + found + ", max: " + maxOccurance);
-
     }
   }
 }

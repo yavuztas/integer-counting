@@ -7,15 +7,15 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
 /**
- * Solution 1: Single-thread with {@link MemorySegment} api
+ * Solution 4: Single-thread with {@link MemorySegment} api
  * <p>
- * 0. First try, single thread approach using HashMap =~ 125ms
- * 1. Change HashMap by a custom integer array        =~ 85ms
+ * 1. Same solution as Solution1 but using the new {@link MemorySegment} api =~ 52ms
+ * 2. Compile into native (25-graal)                                         =~ 113ms (definitely GraalVM Native doesn't play well with the MemorySegment api)
  */
-public class Solution11 {
+public class Solution4 {
 
   // collecting numbers into an array eleminates a lot of operations like auto-boxing, hash calculation, boundary checks, etc.
-  // mapped one-to-one with indices is possible since our data set is limited [0 - 999] Therefore, this eleminates hash calculation because no clashes possible
+  // mapped one-to-one with indices is possible since our data set is limited [0-999] Therefore, this eleminates hash calculation because no clashes possible
   private static final int[] NUMBER_MAP = new int[1000];
 
   public static void main(String[] args) throws Exception {

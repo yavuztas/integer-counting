@@ -6,12 +6,12 @@ import java.nio.channels.FileChannel;
 /**
  * Concurrent Processing, Lock-free via actor-model approach
  * <p>
- * 1. Process concurrently            =~ 125ms
- *    - interestingly slower than single thread version
- *    - spawning platform threads costs a lot (~40ms) comparing to processing 1m records.
+ * 1. Process concurrently            =~ 67ms
+ *    - Interestingly slower than the single thread version
+ *    - Spawning platform threads costs a lot (~20ms) and our dataset (1M) is still relatively small.
  *      However, if we assume the dataset is arbitrarily large (like 1 billion) then multi-thread processing should outperform.
- *    - using virtual threads didn't help, worse in performance ~155ms
- * 2. Compile into native (25-graal)  =~ 15ms (same performance with single thread version)
+ *    - Using virtual threads didn't help, worse in performance ~88ms
+ * 2. Compile into native (25-graal)  =~ 5.8ms (same performance with the single thread version)
  */
 public class Solution3 {
 
@@ -47,11 +47,11 @@ public class Solution3 {
 
   }
 
-  static int findSegmentStart(ByteBuffer buffer, int pos) {
+  static int findSegmentStart(ByteBuffer segment, int pos) {
     if (pos == 0)
       return 0;
-    // read segment to backwards until find the first '\n'
-    while (buffer.get(pos) != '\n') {
+    // read the segment to backwards until find the first '\n'
+    while (segment.get(pos) != '\n') {
       pos--;
     }
     return pos + 1;
@@ -72,7 +72,7 @@ public class Solution3 {
     final MappedByteBuffer buffer;
     try (final var file = new RandomAccessFile(inputFile, "r")) {
       final FileChannel channel = file.getChannel();
-      buffer = channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size()); // we don't care channel size here since can be max ~= 4M < Integer.MAX_VALUE
+      buffer = channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size()); // we don't care about channel size here since can be max ~= 4M < Integer.MAX_VALUE
     }
 
     final Actor[] actors = new Actor[THREAD_COUNT];
@@ -94,7 +94,7 @@ public class Solution3 {
 
     int found = 0;
     int maxOccurance = 0;
-    // merge partial results into global, and find max occured number
+    // merge partial results into the global and find the max occured number
     for (int i = 0; i < NUMBER_MAP.length; i++) {
       for (int j = 0; j < THREAD_COUNT; j++) {
         final var actor = actors[j];
@@ -108,7 +108,6 @@ public class Solution3 {
 
     // print result
     System.out.println("Found " + found + ", max: " + maxOccurance);
-
   }
 
 }
