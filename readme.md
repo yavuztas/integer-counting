@@ -58,7 +58,7 @@ Run `evaluate.sh Solution5`.
 * Showing elapsed time in ms. 
 * (x) terminated with error, possibly needs refactoring (against integer overflow, etc.)
 
-### Comparison (Java 25 GraalVM — Compiled Native)
+### Comparison (Java 25 GraalVM — Native)
 | SOLUTION                                                        | 1M    | 10M   | 100M  | 1B   |
 |-----------------------------------------------------------------|-------|-------|-------|------|
 | Single-Threaded - using MappedByteArray                         | 7.1   | 33.5  | 313.8 | x    |
