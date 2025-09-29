@@ -45,3 +45,28 @@ Run `evaluate.sh Solution4`.
 
 ### Single-Threaded - branchless version, scan four bytes at a time
 Run `evaluate.sh Solution5`.
+
+### Comparison (Java 25 GraalVM — JIT Version)
+| SOLUTION                                                        | 1M   | 10M   | 100M  | 1B    |
+|-----------------------------------------------------------------|------|-------|-------|-------|
+| Single-Threaded - using MappedByteArray                         | 53.8 | 79.9  | 348.9 | x     |
+| Multi-Threaded - lockless synchronization (CAS)                 | 82.2 | 122.3 | 625.2 | 5682  |
+| Multi-Threaded - lock-free via actor-model approach             | 76.9 | 79.3  | 117.4 | 499.9 |
+| Single-Threaded - using Java Memory Api                         | 52.6 | 84.0  | 406.5 | 3996  |
+| Single-Threaded - branchless version, scan four bytes at a time | 55.3 | 89.4  | 429.1 | x     |
+
+* Showing elapsed time in ms. 
+* (x) terminated with error, possibly needs refactoring (against integer overflow, etc.)
+
+### Comparison (Java 25 GraalVM — Compiled Native)
+| SOLUTION                                                        | 1M    | 10M   | 100M  | 1B   |
+|-----------------------------------------------------------------|-------|-------|-------|------|
+| Single-Threaded - using MappedByteArray                         | 7.1   | 33.5  | 313.8 | x    |
+| Multi-Threaded - lockless synchronization (CAS)                 | 9.9   | 56.7  | 517.1 | 5115 |
+| Multi-Threaded - lock-free via actor-model approach             | 5.0   | 10.5  | 59.4  | 529  |
+| Single-Threaded - using Java Memory Api                         | 107.1 | 917.7 | oom   | oom  |
+| Single-Threaded - branchless version, scan four bytes at a time | 8.1   | 43.0  | 386.3 | x    |
+
+* Showing elapsed time in ms.
+* (x) terminated with an error, possibly needs refactoring (against integer overflow, etc.).
+* (oom) Ouf of Memory error, Java Memory Api doesn't play nice with GraalVM Native since memory usage increases excessively.
