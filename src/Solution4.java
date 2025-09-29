@@ -27,21 +27,28 @@ public class Solution4 {
       final MemorySegment segment = channel.map(FileChannel.MapMode.READ_ONLY, 0, fileSize, Arena.global());
 
       int current = 0; // current number
-      int maxOccurance = 0;
-      int found = 0;
       byte b;
-      int pos = 0;
+      long pos = 0;
       while (pos < fileSize) {
-        if ((b = segment.get(ValueLayout.JAVA_BYTE, pos++)) == '\n') { // read & check each byte
-          if (++NUMBER_MAP[current] > maxOccurance) { // increment and check
-            maxOccurance = NUMBER_MAP[current];
-            found = current;
-          }
+        if ((b = segment.get(ValueLayout.JAVA_BYTE, pos++)) == '\n') { // read and check each byte
+          NUMBER_MAP[current]++; // increment
           current = 0;
           continue;
         }
         current = 10 * current + (b-'0');
       }
+
+      int found = 0;
+      int maxOccurance = 0;
+      // find max occured number out of hotspot, it's O(k) where k = 1000, ignorable
+      for (int i = 0; i < NUMBER_MAP.length; i++) {
+        final var sum = NUMBER_MAP[i];
+        if (sum > maxOccurance) {
+          maxOccurance = sum;
+          found = i;
+        }
+      }
+
       // print result
       System.out.println("Found " + found + ", max: " + maxOccurance);
     }

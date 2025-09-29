@@ -66,10 +66,10 @@ public class Solution5 {
         linebreakPos = linebreakPos(chunk);
         pos += linebreakPos + 1;
 
-        final int n = 4 - linebreakPos; // rotate count
+        final int n = 4 - linebreakPos; // zero count
         int number = (chunk & maskTopNBytes(n)) + zeroCharMask(n); // swap all '\n' and the rest with '0'
-        number = Integer.rotateRight(number, n*8);
-        number = parseFourDigits(number);
+        number = Integer.rotateRight(number, n*8); // rotate zeros to collect them in higher bits
+        number = parseFourDigits(number); // parsing ignores zeros since they're in higher bits, ex: "0062" => 2*1 + 6*10 + 0*100 + 0*1000 = 62
         NUMBER_MAP[number]++; // increment
       }
 

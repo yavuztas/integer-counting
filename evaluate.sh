@@ -2,7 +2,7 @@
 
 JAVA_VERSION=25
 JAVA_VERSION_ID="25-graal"
-INPUT_ARGS="./data/1B_random_numbers.txt"
+INPUT_ARGS="./data/1M_random_numbers.txt"
 
 # Handle positional arguments
 shift $((OPTIND - 1))
